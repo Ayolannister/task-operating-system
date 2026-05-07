@@ -1,0 +1,9 @@
+api:
+  name: api
+  image: ayolannister/task-api:v1
+
+frontend:
+  image: ayolannister/task-frontend:v1
+
+worker:
+  image: ayolannister/task-worker:v1
