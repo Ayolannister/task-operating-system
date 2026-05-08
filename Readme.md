@@ -15,36 +15,7 @@ This project demonstrates modern DevOps practices including:
 
 ⸻
 
-                   Architecture
-                ┌─────────────┐
-                │   Frontend  │
-                └──────┬──────┘
-                       │
-                 HTTP Requests
-                       │
-                ┌──────▼──────┐
-                │    Nginx    │
-                │ ReverseProxy│
-                └──────┬──────┘
-                       │
-        ┌──────────────┴──────────────┐
-        │                             │
- ┌──────▼──────┐              ┌──────▼──────┐
- │     API     │              │   Worker    │
- │  Node.js    │              │ Background  │
- └──────┬──────┘              │ Processing  │
-        │                     └──────┬──────┘
-        │                            │
-        │                    Redis Queue
-        │                            │
- ┌──────▼──────┐              ┌──────▼──────┐
- │ PostgreSQL  │              │    Redis    │
- │ Database    │              │    Cache    │
- └─────────────┘              └─────────────┘
-
- ⸻
-
-Tech Stack
+               
 
 Backend
 
@@ -83,20 +54,6 @@ Features
 
 ⸻
 
-Project Structure
-task-system/
-│
-├── api/
-├── worker/
-├── frontend/
-├── nginx/
-├── helm/
-│   ├── templates/
-│   ├── Chart.yaml
-│   └── values.yaml
-│
-├── docker-compose.yml
-└── README.md
 
 Running Locally With Docker Compose
 
