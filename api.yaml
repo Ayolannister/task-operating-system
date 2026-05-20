@@ -20,7 +20,19 @@ spec:
       containers:
       - name: api
 
-        image: ayolannister/task-api:v1
+        image: ayolannister/task-operatingsystem-api:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_USER
+          value: "dev"
+        - name: DB_PASSWORD
+          value: "dev"
+        - name: DB_NAME
+          value: "tasks"
+        - name: REDIS_HOST
+          value: "redis"
 
         ports:
         - containerPort: 5000
@@ -32,6 +44,8 @@ metadata:
   namespace: task-system
 
 spec:
+  type: NodePort
+
   selector:
     app: api
 

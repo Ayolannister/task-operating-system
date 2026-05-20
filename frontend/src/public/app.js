@@ -3,7 +3,7 @@ const API_URL = "/api";
 async function createTask() {
   const task = document.getElementById("taskInput").value;
 
-  await fetch(`${API_URL}/task`, {
+  await fetch(`${API_URL}/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -15,7 +15,7 @@ async function createTask() {
 }
 
 async function loadTasks() {
-  const res = await fetch(`${API_URL}/tasks`);
+  const res = await fetch(`${API_URL}/`);
   const tasks = await res.json();
 
   const list = document.getElementById("taskList");

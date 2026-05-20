@@ -1,9 +1,9 @@
 api:
   name: api
-  image: ayolannister/task-api:v1
+  image: ayolannister/task-operatingsystem-api:latest
 
 frontend:
-  image: ayolannister/task-frontend:v1
+  image: ayolannister/task-operatingsystem-frontend:latest
 
 worker:
-  image: ayolannister/task-worker:v1
+  image: ayolannister/task-operatingsystem-worker:latest
