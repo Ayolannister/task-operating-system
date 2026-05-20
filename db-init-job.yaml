@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+  namespace: task-system
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: db-init
+        image: postgres:15
+        env:
+        - name: PGPASSWORD
+          value: "dev"
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres -U dev; do
+            echo "Waiting for Postgres..."
+            sleep 1
+          done
+          psql -h postgres -U dev -d tasks -c "CREATE TABLE IF NOT EXISTS tasks (id UUID PRIMARY KEY, task TEXT, status TEXT);"

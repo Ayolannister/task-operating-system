@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 const router = express.Router();
 
 // Create task
-router.post("/task", async (req, res) => {
+router.post("/", async (req, res) => {
   const id = uuidv4();
   const { task } = req.body;
 
@@ -26,7 +26,7 @@ router.post("/task", async (req, res) => {
 });
 
 // Get tasks
-router.get("/tasks", async (req, res) => {
+router.get("/", async (req, res) => {
   const result = await pool.query("SELECT * FROM tasks");
   res.json(result.rows);
 });

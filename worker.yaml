@@ -20,4 +20,16 @@ spec:
       containers:
       - name: worker
 
-        image: ayolannister/task-worker:v1
+        image: ayolannister/task-operatingsystem-worker:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_USER
+          value: "dev"
+        - name: DB_PASSWORD
+          value: "dev"
+        - name: DB_NAME
+          value: "tasks"
+        - name: REDIS_HOST
+          value: "redis"

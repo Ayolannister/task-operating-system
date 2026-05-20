@@ -20,7 +20,8 @@ spec:
       containers:
       - name: frontend
 
-        image: ayolannister/task-frontend:v1
+        image: ayolannister/task-operatingsystem-frontend:latest
+        imagePullPolicy: IfNotPresent
 
         ports:
         - containerPort: 3000
