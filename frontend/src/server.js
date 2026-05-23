@@ -8,15 +8,23 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const API_URL = process.env.API_URL || "/api";
+
+app.get("/env.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript");
+  res.send(`window.API_URL = "${API_URL}";`);
+});
+
 app.use("/api", (req, res) => {
   const backendUrl = `/api${req.url}`;
+  const apiHost = process.env.API_HOST || "api";
   const proxyReq = http.request(
     {
-      hostname: "api",
+      hostname: apiHost,
       port: 5000,
       path: backendUrl,
       method: req.method,
-      headers: { ...req.headers, host: "api:5000" },
+      headers: { ...req.headers, host: `${apiHost}:5000` },
     },
     (proxyRes) => {
       res.writeHead(proxyRes.statusCode || 500, proxyRes.headers);
