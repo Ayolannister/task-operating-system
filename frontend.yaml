@@ -23,6 +23,10 @@ spec:
         image: ayolannister/task-operatingsystem-frontend:latest
         imagePullPolicy: IfNotPresent
 
+        env:
+        - name: API_URL
+          value: "/api"
+
         ports:
         - containerPort: 3000
 ---

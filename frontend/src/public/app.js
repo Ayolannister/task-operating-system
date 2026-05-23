@@ -1,4 +1,4 @@
-const API_URL = "/api";
+const API_URL = window.API_URL || "/api";
 
 async function createTask() {
   const task = document.getElementById("taskInput").value;
