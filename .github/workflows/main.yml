@@ -15,8 +15,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Hello World container
-        run: docker run hello-world
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - name: Run Alpine container with echo
-        run: docker run alpine echo "Hello from Alpine!"
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve

@@ -1,0 +1,13 @@
+1. Install or upgrade the chart into AKS:
+
+   helm upgrade --install task-system . --create-namespace --namespace task-system
+
+2. Check resources:
+
+   kubectl get pods,svc -n task-system
+
+3. If frontend is exposed with a LoadBalancer:
+
+   kubectl get svc -n task-system {{ include "task-system.fullname" . }}-frontend
+
+4. To enable ingress, set `ingress.enabled: true` and update `ingress.hosts[0].host` to your domain.

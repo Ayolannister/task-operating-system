@@ -1,17 +1,10 @@
-replicaCount: 1
-
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  tag: ""
-
+imagePullPolicy: IfNotPresent
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
   create: true
-  automount: true
   annotations: {}
   name: ""
 
@@ -19,12 +12,80 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext: {}
-
 securityContext: {}
 
-service:
-  type: ClusterIP
-  port: 80
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+resources: {}
+
+postgres:
+  enabled: true
+  image: postgres:15
+  tag: ""
+  pullPolicy: IfNotPresent
+  replicaCount: 1
+  user: dev
+  password: dev
+  database: tasks
+  service:
+    port: 5432
+  persistence:
+    enabled: false
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: ""
+
+redis:
+  enabled: true
+  image: redis:7
+  pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    port: 6379
+
+api:
+  enabled: true
+  image: ayolannister/task-operatingsystem-api
+  tag: latest
+  pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 5000
+  env:
+    DB_HOST: postgres
+    DB_USER: dev
+    DB_PASSWORD: dev
+    DB_NAME: tasks
+    REDIS_HOST: redis
+
+frontend:
+  enabled: true
+  image: ayolannister/task-operatingsystem-frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+  env:
+    API_URL: /api
+
+worker:
+  enabled: true
+  image: ayolannister/task-operatingsystem-worker
+  tag: latest
+  pullPolicy: IfNotPresent
+  replicaCount: 1
+  env:
+    DB_HOST: postgres
+    DB_USER: dev
+    DB_PASSWORD: dev
+    DB_NAME: tasks
+    REDIS_HOST: redis
 
 ingress:
   enabled: false
@@ -34,46 +95,5 @@ ingress:
     - host: chart-example.local
       paths:
         - path: /
-          pathType: ImplementationSpecific
+          pathType: Prefix
   tls: []
-
-httpRoute:
-  enabled: false
-  annotations: {}
-  parentRefs:
-  - name: gateway
-    sectionName: http
-  hostnames:
-  - chart-example.local
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /headers
-
-resources: {}
-
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-
-volumes: []
-
-volumeMounts: []
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}

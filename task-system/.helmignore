@@ -21,3 +21,9 @@
 .idea/
 *.tmproj
 .vscode/
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform-provider-*
+*.zip
+*.tar.gz
