@@ -3,7 +3,8 @@ node_modules/
 pgdata/
 .terraform/
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
+.terraform.lock.hcl
 terraform.tfvars
 terraform.tfvars.json
 *.log
