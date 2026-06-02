@@ -4,8 +4,7 @@ pgdata/
 .terraform/
 *.tfstate
 *.tfstate.backup
-.terraform/
 terraform.tfvars
 terraform.tfvars.json
 *.log
-*.tfplan    
+*.tfplan
