@@ -18,11 +18,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Show files
+        run: |
+          pwd
+          ls -la
+          find . -name "*.tf"
+
       - name: Terraform Init
+        working-directory: ./aks-infra
         run: terraform init
+
       - name: Terraform Plan
+        working-directory: ./aks-infra
         run: terraform plan
-      - name: Terraform Apply
-        run: terraform apply -auto-approve

@@ -41,6 +41,7 @@ postgres:
 redis:
   enabled: true
   image: redis:7
+  tag: ""
   pullPolicy: IfNotPresent
   replicaCount: 1
   service:
@@ -61,6 +62,15 @@ api:
     DB_PASSWORD: dev
     DB_NAME: tasks
     REDIS_HOST: redis
+    REDIS_PORT: "6379"
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
 
 frontend:
   enabled: true
@@ -87,6 +97,7 @@ worker:
     DB_PASSWORD: dev
     DB_NAME: tasks
     REDIS_HOST: redis
+    REDIS_PORT: "6379"
 
 ingress:
   enabled: false
@@ -113,17 +124,6 @@ httpRoute:
         type: PathPrefix
         value: /headers
 
-resources: {}
-
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -133,10 +133,4 @@ autoscaling:
 volumes: []
 
 volumeMounts: []
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
 
