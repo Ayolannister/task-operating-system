@@ -2,7 +2,9 @@ name: Build and Push Docker Image to ACR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+        - main
+  workflow_dispatch:
 
 permissions:
   id-token: write
