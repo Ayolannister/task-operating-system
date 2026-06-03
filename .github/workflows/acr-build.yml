@@ -26,12 +26,12 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Login to ACR
-        run: az acr login --name <yourAcrName>
+        run: az acr login --name taskregistry1
 
       - name: Build Docker image
         run: |
-          docker build -t <yourAcrName>.azurecr.io/task-app:${{ github.sha }} .
+          docker build -t taskregistry1.azurecr.io/task-app:${{ github.sha }} .
 
       - name: Push Docker image
         run: |
-          docker push <yourAcrName>.azurecr.io/task-app:${{ github.sha }}
+          docker push taskregistry1.azurecr.io/task-app:${{ github.sha }}
