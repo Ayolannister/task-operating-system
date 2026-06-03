@@ -3,7 +3,7 @@ name: Build and Push Docker Image to ACR
 on:
   push:
     branches: 
-        - main
+      - main
   workflow_dispatch:
 
 permissions:
@@ -25,6 +25,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: ACR Login
+        run: az acr login --name taskregistry1
+
       - name: Build API image
         run: |
           docker build -t taskregistry1.azurecr.io/api:${{ github.sha }} ./api
@@ -36,3 +39,15 @@ jobs:
       - name: Build Frontend image
         run: |
           docker build -t taskregistry1.azurecr.io/frontend:${{ github.sha }} ./frontend
+
+      - name: Push API image
+        run: |
+          docker push taskregistry1.azurecr.io/api:${{ github.sha }}
+
+      - name: Push Worker image
+        run: |
+          docker push taskregistry1.azurecr.io/worker:${{ github.sha }}
+
+      - name: Push Frontend image
+        run: |
+          docker push taskregistry1.azurecr.io/frontend:${{ github.sha }}
