@@ -1,0 +1,35 @@
+name: Build and Push Docker Image to ACR
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        run: az acr login --name <yourAcrName>
+
+      - name: Build Docker image
+        run: |
+          docker build -t <yourAcrName>.azurecr.io/task-app:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: |
+          docker push <yourAcrName>.azurecr.io/task-app:${{ github.sha }}
