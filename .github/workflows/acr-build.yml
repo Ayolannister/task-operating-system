@@ -51,3 +51,5 @@ jobs:
       - name: Push Frontend image
         run: |
           docker push taskregistry1.azurecr.io/frontend:${{ github.sha }}
+
+          
