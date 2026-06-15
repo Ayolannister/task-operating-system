@@ -57,8 +57,15 @@ jobs:
       - name: Update Deployment Image
         run: |
           kubectl set image deployment/task-app task-app=${IMAGE_REPOSITORY}:${IMAGE_TAG}
-
-      - name: Check Deployment
+      
+      - name: Debug Deployment
+        run: |
+         kubectl get nodes
+         kubectl get pods
+         kubectl get deployment task-app
+         kubectl describe deployment task-app
+      
+         - name: Check Deployment
         run: |
           kubectl rollout status deployment/task-app
 
