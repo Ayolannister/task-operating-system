@@ -48,7 +48,11 @@ jobs:
             --name demo \
             --overwrite-existing
 
-      
+      - name: Verify AKS Context
+        run: |
+              kubectl config current-context
+              kubectl cluster-info
+              kubectl get nodes
 
       - name: Apply Kubernetes Manifests
         run: |
