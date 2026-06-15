@@ -1,15 +1,13 @@
-name: Deploy ACR Image to AKS
+name: Deploy Frontend Image to AKS
 
 on:
   push:
-  
     branches:
       - main
-  workflow_dispatch:
-
     paths:
       - 'k8s-cloud/**'
       - '.github/workflows/aks-deploy.yml'
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -17,15 +15,15 @@ permissions:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
 
-    steps:
+    env:
+      IMAGE_REPOSITORY: taskregistry1.azurecr.io/frontend
+      IMAGE_TAG: ${{ github.sha }}
 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-     
 
       - name: Azure Login
         uses: azure/login@v2
@@ -38,8 +36,6 @@ jobs:
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
-
-   
 
       - name: Get AKS Credentials
         run: |
@@ -58,7 +54,9 @@ jobs:
         run: |
           kubectl apply -f k8s-cloud/
 
-      #
+      - name: Update Deployment Image
+        run: |
+          kubectl set image deployment/task-app task-app=${IMAGE_REPOSITORY}:${IMAGE_TAG}
 
       - name: Check Deployment
         run: |
