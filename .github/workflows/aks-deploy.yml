@@ -65,7 +65,7 @@ jobs:
          kubectl get deployment task-app
          kubectl describe deployment task-app
       
-         - name: Check Deployment
+      - name: Check Deployment
         run: |
           kubectl rollout status deployment/task-app
 
