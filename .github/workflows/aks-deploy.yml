@@ -1,0 +1,63 @@
+name: Deploy ACR Image to AKS
+
+on:
+  push:
+    branches:
+      - main
+
+    paths:
+      - 'k8s-cloud/**'
+      - '.github/workflows/aks-deploy.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+     
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+   
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group task-rg \
+            --name demo \
+            --overwrite-existing
+
+      
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f k8s-cloud/
+
+      #
+
+      - name: Check Deployment
+        run: |
+          kubectl rollout status deployment/task-app
+
+      - name: Show Services
+        run: |
+          kubectl get svc
