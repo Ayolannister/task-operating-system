@@ -2,8 +2,10 @@ name: Deploy ACR Image to AKS
 
 on:
   push:
+  
     branches:
       - main
+  workflow_dispatch:
 
     paths:
       - 'k8s-cloud/**'
