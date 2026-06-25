@@ -1,25 +1,28 @@
+
 apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: task-app
+  name: frontend
+  namespace: task-system
 
 spec:
   replicas: 2
 
   selector:
     matchLabels:
-      app: task-app
+      app: frontend
 
   template:
     metadata:
       labels:
-        app: task-app
+        app: frontend
 
     spec:
       containers:
-      - name: task-app
-        image: taskregistry1.azurecr.io/frontend:latest
+        - name: frontend
+          image: taskregistry1.azurecr.io/frontend:${{ github.sha }}
+          imagePullPolicy: Always
 
-        ports:
-        - containerPort: 3000
+          ports:
+            - containerPort: 3000

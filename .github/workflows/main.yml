@@ -144,7 +144,7 @@ jobs:
         run: |
           kubectl set image deployment/api \
             api=$ACR_LOGIN_SERVER/api:${{ github.sha }} \
-            -n task-system
+            -n task-system || true
 
       - name: Update Worker Deployment
         run: |
