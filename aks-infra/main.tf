@@ -14,13 +14,6 @@ terraform {
   }
  }
 
-# provider "azurerm" {
-#   features {
-#   #   resource_group {
-#   #     prevent_deletion_if_contains_resources = false
-#   #   }
-#   }
-# }
 provider "azurerm" {
   subscription_id = "4d2f3d90-3f7a-4f44-bb7f-bee999a3638b"
   
@@ -32,8 +25,7 @@ resource "azurerm_resource_group" "task" {
   location = var.location
 }
 module "aks" {
-  source    = "Azure/avm-res-containerservice-managedcluster/azurerm"
-  version   = "0.4.2"
+  source    = "./modules/aks"
   location  = azurerm_resource_group.task.location
   name      = "demo"
   parent_id = azurerm_resource_group.task.id

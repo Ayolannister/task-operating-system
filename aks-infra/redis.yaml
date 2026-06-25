@@ -46,7 +46,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard   # Use premium SSDs for Redis
+  storageClassName: managed-csi  # Use premium SSDs for Redis
 
 ---
 apiVersion: apps/v1
