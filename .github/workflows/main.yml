@@ -91,12 +91,7 @@ jobs:
             echo "ACR already exists"
           fi
 
-      - name: Attach ACR to AKS
-        run: |
-          az aks update \
-            --resource-group $RESOURCE_GROUP \
-            --name $AKS_CLUSTER \
-            --attach-acr $ACR_NAME
+     
 
       - name: ACR Login
         run: az acr login --name $ACR_NAME
@@ -180,4 +175,4 @@ jobs:
           kubectl get pods -n task-system
           kubectl get svc -n task-system
           kubectl get ingress -n task-system
-          
+
