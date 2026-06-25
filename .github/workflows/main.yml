@@ -61,7 +61,20 @@ jobs:
           --name $AKS_CLUSTER \
           --overwrite-existing
 
-    
+    - name: Create ACR if it does not exist
+      run: |
+          if ! az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP &>/dev/null; then
+           echo "Creating ACR..."
+      
+          az acr create \
+          --resource-group $RESOURCE_GROUP \
+          --name $ACR_NAME \
+           --sku Basic \
+           --admin-enabled true
+           else
+           echo "ACR already exists"
+          fi
+
     - name: ACR Login
       run: az acr login --name $ACR_NAME
 
