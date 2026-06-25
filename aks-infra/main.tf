@@ -24,6 +24,14 @@ resource "azurerm_resource_group" "task" {
   name     = var.resource_group_name
   location = var.location
 }
+# module "aks" {
+#   source = "./modules/aks"
+
+#   location            = azurerm_resource_group.task.location
+#   resource_group_name = azurerm_resource_group.task.name
+#   name                = "demo"
+#   dns_prefix          = "taskaks"
+# }
 module "aks" {
   source    = "./modules/aks"
   location  = azurerm_resource_group.task.location
@@ -34,4 +42,3 @@ module "aks" {
 
   
 }
-
