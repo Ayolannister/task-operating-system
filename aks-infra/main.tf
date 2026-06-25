@@ -33,7 +33,7 @@ resource "azurerm_resource_group" "task" {
 #   dns_prefix          = "taskaks"
 # }
 module "aks" {
-  source    = "./modules/aks"
+  source    = "Azure/avm-res-containerservice-managedcluster/azurerm"
   location  = azurerm_resource_group.task.location
   name      = "demo"
   parent_id = azurerm_resource_group.task.id
