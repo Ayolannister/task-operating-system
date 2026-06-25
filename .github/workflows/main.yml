@@ -14,7 +14,7 @@ env:
   ACR_NAME: taskregistry1
   ACR_LOGIN_SERVER: taskregistry1.azurecr.io
   RESOURCE_GROUP: task-resource-group
-  AKS_CLUSTER: task-aks
+  AKS_CLUSTER:  demo
 
 jobs:
   terraform-build-deploy:
