@@ -7,6 +7,13 @@ metadata:
 
 spec:
   replicas: 1
+   progressDeadlineSeconds: 600
+
+  strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
 
   selector:
     matchLabels:
@@ -18,6 +25,9 @@ spec:
         app: api
 
     spec:
+      terminationGracePeriodSeconds: 30
+
+
       containers:
         - name: api
           image: taskregistry1.azurecr.io/api:${{ github.sha }}
@@ -46,15 +56,17 @@ spec:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 10
-            periodSeconds: 5
-
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 10
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
             initialDelaySeconds: 20
             periodSeconds: 10
+            
 
 ---
 apiVersion: v1

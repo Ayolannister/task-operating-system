@@ -160,7 +160,9 @@ jobs:
 
       - name: Verify API Rollout
         run: |
-          kubectl rollout status deployment/api -n task-system
+           kubectl rollout status deployment/api \
+           -n task-system \
+             --timeout=300s
 
       - name: Verify Worker Rollout
         run: |
