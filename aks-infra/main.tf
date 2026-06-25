@@ -38,7 +38,5 @@ module "aks" {
   name      = "demo"
   parent_id = azurerm_resource_group.task.id
   dns_prefix = "taskaks"
-
-
   
 }
