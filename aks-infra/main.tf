@@ -18,6 +18,8 @@ provider "azurerm" {
   subscription_id = "4d2f3d90-3f7a-4f44-bb7f-bee999a3638b"
   
   features {}
+
+  
 }
 
 resource "azurerm_resource_group" "task" {
