@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 
@@ -23,6 +22,10 @@ spec:
         - name: frontend
           image: taskregistry1.azurecr.io/frontend:latest
           imagePullPolicy: Always
+
+          env:
+            - name: API_URL
+              value: /api
 
           ports:
             - containerPort: 3000

@@ -1,18 +1,65 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: postgres
+#   namespace: task-system
+
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: postgres
+
+#   template:
+#     metadata:
+#       labels:
+#         app: postgres
+
+#     spec:
+#       containers:
+#       - name: postgres
+#         image: postgres:15
+#         env:
+#         - name: POSTGRES_USER
+#           value: "dev"
+#         - name: POSTGRES_PASSWORD
+#           value: "dev"
+#         - name: POSTGRES_DB
+#           value: "tasks"
+#         ports:
+#         - containerPort: 5432
+#         volumeMounts:
+#         - name: postgres-data
+#           mountPath: /var/lib/postgresql/data
+#       volumes:
+#       - name: postgres-data
+#         emptyDir: {}
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: postgres
+#   namespace: task-system
+
+# spec:
+#   selector:
+#     app: postgres
+#   ports:
+#   - port: 5432
+#     targetPort: 5432
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
   namespace: task-system
-
 spec:
   accessModes:
     - ReadWriteOnce
-
-  storageClassName: managed-csi
-
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
+  storageClassName: managed-csi  # Azure premium SSD for performance
 
 ---
 apiVersion: apps/v1
@@ -20,52 +67,35 @@ kind: Deployment
 metadata:
   name: postgres
   namespace: task-system
-
 spec:
   replicas: 1
-
   selector:
     matchLabels:
       app: postgres
-
   template:
     metadata:
       labels:
         app: postgres
-
     spec:
       containers:
       - name: postgres
         image: postgres:15
-
         env:
         - name: POSTGRES_USER
           value: "dev"
-
         - name: POSTGRES_PASSWORD
           value: "dev"
-
         - name: POSTGRES_DB
           value: "tasks"
-
         ports:
         - containerPort: 5432
-
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
-
-        - name: postgres-initdb
-          mountPath: /docker-entrypoint-initdb.d
-
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
           claimName: postgres-pvc
-
-      - name: postgres-initdb
-        configMap:
-          name: postgres-init-script
 
 ---
 apiVersion: v1
@@ -73,11 +103,9 @@ kind: Service
 metadata:
   name: postgres
   namespace: task-system
-
 spec:
   selector:
     app: postgres
-
   ports:
   - port: 5432
     targetPort: 5432

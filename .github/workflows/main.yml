@@ -109,31 +109,36 @@ jobs:
       - name: Build API Image
         run: |
           docker build \
-            -t $ACR_LOGIN_SERVER/api:${{ github.sha }} \
-            ./api
-
+          -t $ACR_LOGIN_SERVER/api:latest \
+          -t $ACR_LOGIN_SERVER/api:${{ github.sha }} \
+           ./api
       - name: Build Worker Image
         run: |
           docker build \
+             -t $ACR_LOGIN_SERVER/worker:latest \
             -t $ACR_LOGIN_SERVER/worker:${{ github.sha }} \
             ./worker
 
       - name: Build Frontend Image
         run: |
           docker build \
+            -t $ACR_LOGIN_SERVER/frontend:latest \
             -t $ACR_LOGIN_SERVER/frontend:${{ github.sha }} \
             ./frontend
 
       - name: Push API Image
         run: |
+          docker push $ACR_LOGIN_SERVER/api:latest
           docker push $ACR_LOGIN_SERVER/api:${{ github.sha }}
 
       - name: Push Worker Image
         run: |
+          docker push $ACR_LOGIN_SERVER/worker:latest
           docker push $ACR_LOGIN_SERVER/worker:${{ github.sha }}
 
       - name: Push Frontend Image
         run: |
+          docker push $ACR_LOGIN_SERVER/frontend:latest
           docker push $ACR_LOGIN_SERVER/frontend:${{ github.sha }}
 
       - name: Apply Kubernetes Manifests
