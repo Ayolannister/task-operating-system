@@ -1,11 +1,21 @@
+
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: frontend
   namespace: task-system
 
 spec:
   replicas: 1
+
+  progressDeadlineSeconds: 600
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
   selector:
     matchLabels:
@@ -17,11 +27,13 @@ spec:
         app: frontend
 
     spec:
+      terminationGracePeriodSeconds: 30
+
       containers:
       - name: frontend
 
-        image: ayolannister/task-operatingsystem-frontend:latest
-        imagePullPolicy: IfNotPresent
+        image: taskregistry1.azurecr.io/frontend:latest
+        imagePullPolicy: Always
 
         env:
         - name: API_URL
@@ -29,15 +41,33 @@ spec:
 
         ports:
         - containerPort: 3000
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 10
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+
 ---
 apiVersion: v1
 kind: Service
+
 metadata:
   name: frontend-service
   namespace: task-system
 
 spec:
-  type: NodePort
+  type: ClusterIP
 
   selector:
     app: frontend
@@ -45,3 +75,4 @@ spec:
   ports:
   - port: 80
     targetPort: 3000
+
