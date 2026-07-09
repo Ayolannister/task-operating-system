@@ -1,0 +1,49 @@
+name: Update Deployments Workflow
+
+on:
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: taskregistry1
+  ACR_LOGIN_SERVER: taskregistry1.azurecr.io
+  RESOURCE_GROUP: task-resource-group
+  AKS_CLUSTER: demo
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Update API Deployment
+        run: |
+          kubectl set image deployment/api \
+            api=$ACR_LOGIN_SERVER/api:${{ github.sha }} \
+            -n task-system || true
+
+      - name: Update Worker Deployment
+        run: |
+          kubectl set image deployment/worker \
+            worker=$ACR_LOGIN_SERVER/worker:${{ github.sha }} \
+            -n task-system
+
+      - name: Update Frontend Deployment
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=$ACR_LOGIN_SERVER/frontend:${{ github.sha }} \
+            -n task-system

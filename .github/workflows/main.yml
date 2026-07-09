@@ -1,4 +1,3 @@
-
 name: AKS CI/CD Pipeline
 
 on:
@@ -6,7 +5,6 @@ on:
     branches:
       - main
       - '**'
-
     paths-ignore:
       - 'README.md'
 
@@ -23,167 +21,26 @@ env:
   AKS_CLUSTER: demo
 
 jobs:
-  terraform-build-deploy:
-    runs-on: ubuntu-latest
+  terraform:
+    uses: ./.github/workflows/terraform.yml
+    secrets: inherit
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+  build-images:
+    needs: terraform
+    uses: ./.github/workflows/build-images.yml
+    secrets: inherit
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  push-images:
+    needs: build-images
+    uses: ./.github/workflows/push-images.yml
+    secrets: inherit
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+  update-deployments:
+    needs: push-images
+    uses: ./.github/workflows/update-deployments.yml
+    secrets: inherit
 
-      - name: Terraform Init
-        working-directory: ./aks-infra
-        run: terraform init
-
-      - name: Terraform Validate
-        working-directory: ./aks-infra
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: ./aks-infra
-        run: terraform plan
-
-      - name: Terraform Apply
-        working-directory: ./aks-infra
-        run: terraform apply -auto-approve
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Get AKS Credentials
-        run: |
-          az aks get-credentials \
-            --resource-group $RESOURCE_GROUP \
-            --name $AKS_CLUSTER \
-            --overwrite-existing
-
-      - name: Wait for AKS Nodes
-        run: |
-          kubectl wait \
-            --for=condition=Ready nodes \
-            --all \
-            --timeout=300s
-
-      - name: Create ACR if it does not exist
-        run: |
-          if ! az acr show \
-            --name $ACR_NAME \
-            --resource-group $RESOURCE_GROUP &>/dev/null; then
-
-            echo "Creating ACR..."
-
-            az acr create \
-              --resource-group $RESOURCE_GROUP \
-              --name $ACR_NAME \
-              --sku Basic \
-              --admin-enabled true
-
-          else
-            echo "ACR already exists"
-          fi
-
-     
-
-      - name: ACR Login
-        run: az acr login --name $ACR_NAME
-
-      - name: Install NGINX Ingress Controller
-        run: |
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
-
-          kubectl wait \
-            --namespace ingress-nginx \
-            --for=condition=ready pod \
-            --selector=app.kubernetes.io/component=controller \
-            --timeout=300s
-
-      - name: Build API Image
-        run: |
-          docker build \
-          -t $ACR_LOGIN_SERVER/api:latest \
-          -t $ACR_LOGIN_SERVER/api:${{ github.sha }} \
-           ./api
-      - name: Build Worker Image
-        run: |
-          docker build \
-             -t $ACR_LOGIN_SERVER/worker:latest \
-            -t $ACR_LOGIN_SERVER/worker:${{ github.sha }} \
-            ./worker
-
-      - name: Build Frontend Image
-        run: |
-          docker build \
-            -t $ACR_LOGIN_SERVER/frontend:latest \
-            -t $ACR_LOGIN_SERVER/frontend:${{ github.sha }} \
-            ./frontend
-
-      - name: Push API Image
-        run: |
-          docker push $ACR_LOGIN_SERVER/api:latest
-          docker push $ACR_LOGIN_SERVER/api:${{ github.sha }}
-
-      - name: Push Worker Image
-        run: |
-          docker push $ACR_LOGIN_SERVER/worker:latest
-          docker push $ACR_LOGIN_SERVER/worker:${{ github.sha }}
-
-      - name: Push Frontend Image
-        run: |
-          docker push $ACR_LOGIN_SERVER/frontend:latest
-          docker push $ACR_LOGIN_SERVER/frontend:${{ github.sha }}
-
-      - name: Apply Kubernetes Manifests
-        run: |
-          kubectl apply -f k8s-cloud/
-
-      - name: Update API Deployment
-        run: |
-          kubectl set image deployment/api \
-            api=$ACR_LOGIN_SERVER/api:${{ github.sha }} \
-            -n task-system || true
-
-      - name: Update Worker Deployment
-        run: |
-          kubectl set image deployment/worker \
-            worker=$ACR_LOGIN_SERVER/worker:${{ github.sha }} \
-            -n task-system
-
-      - name: Update Frontend Deployment
-        run: |
-          kubectl set image deployment/frontend \
-            frontend=$ACR_LOGIN_SERVER/frontend:${{ github.sha }} \
-            -n task-system
-
-      - name: Verify API Rollout
-        run: |
-          kubectl rollout status deployment/api \
-           -n task-system \
-           --timeout=300s
-
-      - name: Verify Worker Rollout
-        run: |
-         kubectl rollout status deployment/worker \
-         -n task-system \
-          --timeout=300s
-
-      - name: Verify Frontend Rollout
-        run: |
-          kubectl rollout status deployment/frontend \
-          -n task-system \
-          --timeout=300s
-
-      - name: Kubernetes Status
-        run: |
-          kubectl get pods -n task-system
-          kubectl get svc -n task-system
-          kubectl get ingress -n task-system
-
+  kubernetes:
+    needs: update-deployments
+    uses: ./.github/workflows/kubernetes.yml
+    secrets: inherit
