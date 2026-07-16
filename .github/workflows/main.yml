@@ -6,7 +6,7 @@ on:
       - main
       - '**'
     paths-ignore:
-      - 'README.md'
+      - README.md
 
   workflow_dispatch:
 
@@ -22,20 +22,20 @@ env:
 
 jobs:
   terraform:
+    name: Provision Infrastructure
     uses: ./.github/workflows/terraform.yml
     secrets: inherit
 
   build-images:
+    name: Build & Push Images
     needs: terraform
     uses: ./.github/workflows/build-images.yml
     secrets: inherit
 
   kubernetes:
+    name: Deploy to AKS
     needs: build-images
     uses: ./.github/workflows/kubernetes.yml
     secrets: inherit
 
-  update-deployments:
-    needs: kubernetes
-    uses: ./.github/workflows/update-deployments.yml
-    secrets: inherit
+  # update-deployments removed; `kubernetes.yml` performs manifests + image updates

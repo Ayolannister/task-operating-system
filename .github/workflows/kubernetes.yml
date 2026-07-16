@@ -1,4 +1,4 @@
-name: Kubernetes Workflow
+name: Deploy to AKS
 
 on:
   workflow_call:
@@ -12,12 +12,15 @@ env:
   ACR_LOGIN_SERVER: taskregistry1.azurecr.io
   RESOURCE_GROUP: task-resource-group
   AKS_CLUSTER: demo
+  NAMESPACE: task-system
 
 jobs:
-  kubernetes:
+  deploy:
+    name: Deploy Application
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Azure Login
@@ -37,6 +40,13 @@ jobs:
             --name $AKS_CLUSTER \
             --overwrite-existing
 
+      - name: Ensure AKS Can Pull From ACR
+        run: |
+          az aks update \
+            --resource-group $RESOURCE_GROUP \
+            --name $AKS_CLUSTER \
+            --attach-acr $ACR_NAME || true
+
       - name: Wait for AKS Nodes
         run: |
           kubectl wait \
@@ -44,43 +54,94 @@ jobs:
             --all \
             --timeout=300s
 
-      - name: Install NGINX Ingress Controller
+      - name: Ensure Namespace Exists
         run: |
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
-
-          kubectl wait \
-            --namespace ingress-nginx \
-            --for=condition=ready pod \
-            --selector=app.kubernetes.io/component=controller \
-            --timeout=300s
+          kubectl create namespace $NAMESPACE \
+            --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s-cloud/
-      - name: Create Namespace
+
+      - name: Update API Deployment
         run: |
-          kubectl create namespace task-system || echo "Namespace already exists"
+          kubectl set image deployment/api \
+            api=$ACR_LOGIN_SERVER/api:${{ github.sha }} \
+            -n $NAMESPACE
+
+      - name: Update Worker Deployment
+        run: |
+          kubectl set image deployment/worker \
+            worker=$ACR_LOGIN_SERVER/worker:${{ github.sha }} \
+            -n $NAMESPACE
+
+      - name: Update Frontend Deployment
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=$ACR_LOGIN_SERVER/frontend:${{ github.sha }} \
+            -n $NAMESPACE
 
       - name: Verify API Rollout
         run: |
           kubectl rollout status deployment/api \
-            -n task-system \
+            -n $NAMESPACE \
             --timeout=300s
 
       - name: Verify Worker Rollout
         run: |
           kubectl rollout status deployment/worker \
-            -n task-system \
+            -n $NAMESPACE \
             --timeout=300s
 
       - name: Verify Frontend Rollout
         run: |
           kubectl rollout status deployment/frontend \
-            -n task-system \
+            -n $NAMESPACE \
             --timeout=300s
 
       - name: Kubernetes Status
+        if: always()
         run: |
-          kubectl get pods -n task-system
-          kubectl get svc -n task-system
-          kubectl get ingress -n task-system
+          echo "========== PODS =========="
+          kubectl get pods -n $NAMESPACE -o wide
+
+          echo
+          echo "========== SERVICES =========="
+          kubectl get svc -n $NAMESPACE
+
+          echo
+          echo "========== INGRESS =========="
+          kubectl get ingress -n $NAMESPACE
+
+          echo
+          echo "========== DEPLOYMENTS =========="
+          kubectl get deployments -n $NAMESPACE
+
+          echo
+          echo "========== EVENTS =========="
+          kubectl get events \
+            -n $NAMESPACE \
+            --sort-by=.lastTimestamp
+
+      - name: Describe Pods on Failure
+        if: failure()
+        run: |
+          for pod in $(kubectl get pods -n $NAMESPACE -o name); do
+            echo "======================================="
+            echo "$pod"
+            echo "======================================="
+            kubectl describe "$pod" -n $NAMESPACE || true
+          done
+
+      - name: Show Container Logs on Failure
+        if: failure()
+        run: |
+          for pod in $(kubectl get pods -n $NAMESPACE -o jsonpath='{.items[*].metadata.name}'); do
+            echo "======================================="
+            echo "$pod"
+            echo "======================================="
+            kubectl logs "$pod" \
+              -n $NAMESPACE \
+              --all-containers=true \
+              --tail=200 || true
+          done

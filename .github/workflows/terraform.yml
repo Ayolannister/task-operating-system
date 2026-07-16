@@ -1,5 +1,6 @@
 name: Terraform Workflow
 
+
 on:
   workflow_call:
 
@@ -8,16 +9,20 @@ permissions:
   contents: read
 
 env:
-  ACR_NAME: taskregistry1
-  ACR_LOGIN_SERVER: taskregistry1.azurecr.io
   RESOURCE_GROUP: task-resource-group
   AKS_CLUSTER: demo
 
 jobs:
   terraform:
+    name: Provision AKS Infrastructure
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./aks-infra
+
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Azure Login
@@ -30,18 +35,25 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Check Terraform Formatting
+        run: terraform fmt -check -recursive
+
       - name: Terraform Init
-        working-directory: ./aks-infra
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: ./aks-infra
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: ./aks-infra
-        run: terraform plan
+        run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        working-directory: ./aks-infra
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
+
+      - name: Verify AKS Cluster
+        run: |
+          az aks show \
+            --resource-group $RESOURCE_GROUP \
+            --name $AKS_CLUSTER \
+            --output table
+
