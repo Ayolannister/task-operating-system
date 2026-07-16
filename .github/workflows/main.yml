@@ -30,12 +30,12 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     secrets: inherit
 
-  update-deployments:
+  kubernetes:
     needs: build-images
-    uses: ./.github/workflows/update-deployments.yml
+    uses: ./.github/workflows/kubernetes.yml
     secrets: inherit
 
-  kubernetes:
-    needs: update-deployments
-    uses: ./.github/workflows/kubernetes.yml
+  update-deployments:
+    needs: kubernetes
+    uses: ./.github/workflows/update-deployments.yml
     secrets: inherit
