@@ -57,6 +57,9 @@ jobs:
       - name: Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s-cloud/
+      - name: Create Namespace
+        run: |
+          kubectl create namespace task-system || echo "Namespace already exists"
 
       - name: Verify API Rollout
         run: |
