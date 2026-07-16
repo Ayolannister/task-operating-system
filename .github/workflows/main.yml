@@ -30,13 +30,8 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     secrets: inherit
 
-  push-images:
-    needs: build-images
-    uses: ./.github/workflows/push-images.yml
-    secrets: inherit
-
   update-deployments:
-    needs: push-images
+    needs: build-images
     uses: ./.github/workflows/update-deployments.yml
     secrets: inherit
 

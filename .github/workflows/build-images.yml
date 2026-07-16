@@ -52,6 +52,11 @@ jobs:
             -t $ACR_LOGIN_SERVER/api:${{ github.sha }} \
             ./api
 
+      - name: Push API Image
+        run: |
+          docker push $ACR_LOGIN_SERVER/api:latest
+          docker push $ACR_LOGIN_SERVER/api:${{ github.sha }}
+
       - name: Build Worker Image
         run: |
           docker build \
@@ -59,9 +64,19 @@ jobs:
             -t $ACR_LOGIN_SERVER/worker:${{ github.sha }} \
             ./worker
 
+      - name: Push Worker Image
+        run: |
+          docker push $ACR_LOGIN_SERVER/worker:latest
+          docker push $ACR_LOGIN_SERVER/worker:${{ github.sha }}
+
       - name: Build Frontend Image
         run: |
           docker build \
             -t $ACR_LOGIN_SERVER/frontend:latest \
             -t $ACR_LOGIN_SERVER/frontend:${{ github.sha }} \
             ./frontend
+
+      - name: Push Frontend Image
+        run: |
+          docker push $ACR_LOGIN_SERVER/frontend:latest
+          docker push $ACR_LOGIN_SERVER/frontend:${{ github.sha }}
