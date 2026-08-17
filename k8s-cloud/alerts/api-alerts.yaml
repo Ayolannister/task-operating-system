@@ -25,4 +25,4 @@ spec:
 
         annotations:
           summary: API is down
-          description: The task API has not been reachable for over one minute.
+          description: The task API has not been reachable for over one minutes and hours .
